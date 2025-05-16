@@ -3,37 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dhikr Counter</title>
+  <title>Dhikr Tracker</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f9f9f9;
+      font-family: sans-serif;
+      margin: 0;
       padding: 20px;
-      text-align: center;
+      background: #f7f9fa;
       color: #333;
     }
 
-    h1 {
-      color: #0f5132;
+    h1, h2 {
+      text-align: center;
+      color: #0c4b33;
     }
 
     select, button {
       padding: 10px;
-      margin: 10px;
       font-size: 16px;
+      margin: 5px;
     }
 
-    .counter-section {
+    .counters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
       margin-top: 20px;
     }
 
     .counter-box {
-      display: inline-block;
-      background: #e0f7fa;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 10px;
-      min-width: 150px;
+      background: #e8f5e9;
+      border-radius: 10px;
+      padding: 15px;
+      width: 180px;
+      text-align: center;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
@@ -43,7 +47,7 @@
     }
 
     .count {
-      font-size: 24px;
+      font-size: 22px;
       margin: 10px 0;
     }
 
@@ -51,32 +55,55 @@
       display: flex;
       justify-content: center;
       gap: 10px;
-      flex-wrap: wrap;
     }
 
     .btn {
-      padding: 8px 14px;
-      font-size: 14px;
+      padding: 6px 12px;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 14px;
     }
 
     .btn-increase {
-      background: #4caf50;
+      background-color: #4caf50;
       color: white;
     }
 
     .btn-reset {
-      background: #f44336;
+      background-color: #f44336;
       color: white;
+    }
+
+    .history {
+      margin-top: 30px;
+    }
+
+    .history-entry {
+      background: #fff;
+      padding: 12px;
+      margin: 10px 0;
+      border-left: 5px solid #0c4b33;
+      border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+
+    .history-entry h3 {
+      margin: 0 0 5px;
+      font-size: 18px;
+    }
+
+    .history-entry ul {
+      padding-left: 20px;
+      margin: 0;
     }
   </style>
 </head>
 <body>
 
-  <h1>Dhikr Counter</h1>
-  <label>Select Dhikrs:</label>
+  <h1>Dhikr Tracker</h1>
+
+  <label>Select Dhikrs:</label><br/>
   <select id="dhikrSelect" multiple>
     <option value="Subhanallah">Subhanallah</option>
     <option value="Alhamdulillah">Alhamdulillah</option>
@@ -84,15 +111,17 @@
     <option value="La ilaha illallah">La ilaha illallah</option>
     <option value="Astaghfirullah">Astaghfirullah</option>
     <option value="Allahumma salli ala Muhammad">Allahumma salli ala Muhammad</option>
-  </select>
-  <br/>
-  <button onclick="startSession()">Start Session</button>
+  </select><br/>
+  <button onclick="startSession()">Start Today’s Dhikr</button>
 
-  <div id="counterArea" class="counter-section"></div>
+  <div id="counterArea" class="counters"></div>
+
+  <div class="history">
+    <h2>Past Dhikr Logs</h2>
+    <div id="historyList"></div>
+  </div>
 
   <script>
-    const counterArea = document.getElementById("counterArea");
-
     function getTodayKolkata() {
       const today = new Intl.DateTimeFormat('en-GB', {
         timeZone: 'Asia/Kolkata',
@@ -104,20 +133,17 @@
     }
 
     const today = getTodayKolkata();
+    const counterArea = document.getElementById("counterArea");
+    const historyList = document.getElementById("historyList");
 
     function startSession() {
-      counterArea.innerHTML = ""; // Reset area
+      counterArea.innerHTML = "";
+      const selected = [...document.getElementById("dhikrSelect").selectedOptions].map(opt => opt.value);
+      if (selected.length === 0) return alert("Please select at least one dhikr");
 
-      const selectedOptions = [...document.getElementById("dhikrSelect").selectedOptions];
-      if (selectedOptions.length === 0) {
-        alert("Please select at least one Dhikr.");
-        return;
-      }
-
-      selectedOptions.forEach(opt => {
-        const name = opt.value;
-        const count = getSavedCount(name);
-
+      const saved = JSON.parse(localStorage.getItem(today)) || {};
+      selected.forEach(name => {
+        const count = saved[name] || 0;
         const box = document.createElement("div");
         box.className = "counter-box";
         box.innerHTML = `
@@ -132,31 +158,56 @@
       });
     }
 
-    function getSavedCount(name) {
-      const data = JSON.parse(localStorage.getItem(today)) || {};
-      return data[name] || 0;
+    function getSavedData() {
+      const all = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          all[key] = JSON.parse(localStorage.getItem(key));
+        }
+      }
+      return all;
     }
 
     function saveCount(name, count) {
       const data = JSON.parse(localStorage.getItem(today)) || {};
       data[name] = count;
       localStorage.setItem(today, JSON.stringify(data));
+      showHistory();
     }
 
     function increment(name) {
       const countEl = document.getElementById("count-" + name);
-      let count = parseInt(countEl.textContent);
-      count++;
+      let count = parseInt(countEl.textContent) + 1;
       countEl.textContent = count;
       saveCount(name, count);
     }
 
     function reset(name) {
-      if (confirm(`Reset count for ${name}?`)) {
+      if (confirm("Reset count for " + name + "?")) {
         document.getElementById("count-" + name).textContent = "0";
         saveCount(name, 0);
       }
     }
+
+    function showHistory() {
+      const allData = getSavedData();
+      const sortedDates = Object.keys(allData).sort().reverse();
+
+      historyList.innerHTML = '';
+      sortedDates.forEach(date => {
+        const entry = document.createElement('div');
+        entry.className = 'history-entry';
+        entry.innerHTML = `<h3>${date}</h3><ul>${
+          Object.entries(allData[date])
+            .map(([dhikr, count]) => `<li>${dhikr}: ${count}</li>`)
+            .join('')
+        }</ul>`;
+        historyList.appendChild(entry);
+      });
+    }
+
+    showHistory(); // Load on start
   </script>
 </body>
 </html>
