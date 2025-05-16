@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dhikr Counter</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+    }
+    .dhikr-select {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+    .dhikr-select label {
+      background: #1e1e1e;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .counter-area {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .dhikr-box {
+      background: #1f1f1f;
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .dhikr-box h2 {
+      margin: 0;
+    }
+    .btn {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #4caf50;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .log-btn {
+      background: #2196f3;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    #logModal {
+      background: #222;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Dhikr Counter</h1>
+
+<div class="dhikr-select">
+  <label><input type="checkbox" value="Astagfirullah" /> Astagfirullah</label>
+  <label><input type="checkbox" value="Subhanallah" /> Subhanallah</label>
+  <label><input type="checkbox" value="Alhamdulillah" /> Alhamdulillah</label>
+  <label><input type="checkbox" value="Allahu Akbar" /> Allahu Akbar</label>
+  <label><input type="checkbox" value="La ilaha illallah" /> La ilaha illallah</label>
+</div>
+
+<button class="btn" onclick="initCounters()">Start Counting</button>
+
+<div class="counter-area" id="counterArea"></div>
+
+<button class="btn log-btn" onclick="showLog()">View Log</button>
+<div id="logModal" style="display:none;"></div>
+
+<script>
+const today = new Date().toISOString().split('T')[0];
+
+function getStorage() {
+  return JSON.parse(localStorage.getItem("dhikrData") || "{}");
+}
+
+function saveStorage(data) {
+  localStorage.setItem("dhikrData", JSON.stringify(data));
+}
+
+function initCounters() {
+  const selected = [...document.querySelectorAll('.dhikr-select input:checked')].map(i => i.value);
+  const area = document.getElementById('counterArea');
+  area.innerHTML = '';
+  const data = getStorage();
+
+  selected.forEach(dhikr => {
+    if (!data[today]) data[today] = {};
+    if (!data[today][dhikr]) data[today][dhikr] = 0;
+
+    const box = document.createElement('div');
+    box.className = 'dhikr-box';
+    box.innerHTML = `
+      <h2>${dhikr}</h2>
+      <p>Count: <span id="count-${dhikr}">${data[today][dhikr]}</span></p>
+      <button class="btn" onclick="increment('${dhikr}')">+1</button>
+      <button class="btn reset-btn" onclick="resetCount('${dhikr}')">Reset</button>
+    `;
+    area.appendChild(box);
+  });
+
+  saveStorage(data);
+}
+
+function increment(dhikr) {
+  const data = getStorage();
+  if (!data[today]) data[today] = {};
+  if (!data[today][dhikr]) data[today][dhikr] = 0;
+  data[today][dhikr]++;
+  document.getElementById(`count-${dhikr}`).innerText = data[today][dhikr];
+  saveStorage(data);
+}
+
+function resetCount(dhikr) {
+  const confirmReset = confirm(`Reset count for "${dhikr}" today?`);
+  if (!confirmReset) return;
+  const data = getStorage();
+  data[today][dhikr] = 0;
+  document.getElementById(`count-${dhikr}`).innerText = 0;
+  saveStorage(data);
+}
+
+function showLog() {
+  const data = getStorage();
+  const log = document.getElementById("logModal");
+  log.innerHTML = "<h3>Daily Dhikr Log</h3>";
+  for (const date in data) {
+    log.innerHTML += `<strong>${date}</strong><br/>`;
+    for (const dhikr in data[date]) {
+      log.innerHTML += `- ${dhikr}: ${data[date][dhikr]}<br/>`;
+    }
+    log.innerHTML += `<hr/>`;
+  }
+  log.style.display = "block";
+}
+</script>
+
+</body>
+</html>
