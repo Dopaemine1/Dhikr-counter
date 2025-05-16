@@ -6,153 +6,157 @@
   <title>Dhikr Counter</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #121212;
-      color: #fff;
-      margin: 0;
-      padding: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+      color: #333;
     }
+
     h1 {
-      text-align: center;
+      color: #0f5132;
     }
-    .dhikr-select {
+
+    select, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+
+    .counter-section {
+      margin-top: 20px;
+    }
+
+    .counter-box {
+      display: inline-block;
+      background: #e0f7fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 10px;
+      min-width: 150px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .dhikr-name {
+      font-weight: bold;
+      color: #00796b;
+    }
+
+    .count {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+
+    .btn-group {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
       justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .dhikr-select label {
-      background: #1e1e1e;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .counter-area {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .dhikr-box {
-      background: #1f1f1f;
-      border-radius: 10px;
-      padding: 1rem;
-      text-align: center;
-    }
-    .dhikr-box h2 {
-      margin: 0;
-    }
+
     .btn {
-      margin-top: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: #4caf50;
+      padding: 8px 14px;
+      font-size: 14px;
       border: none;
-      color: white;
-      font-size: 1rem;
       border-radius: 6px;
       cursor: pointer;
     }
-    .log-btn {
-      background: #2196f3;
+
+    .btn-increase {
+      background: #4caf50;
+      color: white;
     }
-    .reset-btn {
+
+    .btn-reset {
       background: #f44336;
-    }
-    #logModal {
-      background: #222;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
+      color: white;
     }
   </style>
 </head>
 <body>
 
-<h1>Dhikr Counter</h1>
+  <h1>Dhikr Counter</h1>
+  <label>Select Dhikrs:</label>
+  <select id="dhikrSelect" multiple>
+    <option value="Subhanallah">Subhanallah</option>
+    <option value="Alhamdulillah">Alhamdulillah</option>
+    <option value="Allahu Akbar">Allahu Akbar</option>
+    <option value="La ilaha illallah">La ilaha illallah</option>
+    <option value="Astaghfirullah">Astaghfirullah</option>
+    <option value="Allahumma salli ala Muhammad">Allahumma salli ala Muhammad</option>
+  </select>
+  <br/>
+  <button onclick="startSession()">Start Session</button>
 
-<div class="dhikr-select">
-  <label><input type="checkbox" value="Astagfirullah" /> Astagfirullah</label>
-  <label><input type="checkbox" value="Subhanallah" /> Subhanallah</label>
-  <label><input type="checkbox" value="Alhamdulillah" /> Alhamdulillah</label>
-  <label><input type="checkbox" value="Allahu Akbar" /> Allahu Akbar</label>
-  <label><input type="checkbox" value="La ilaha illallah" /> La ilaha illallah</label>
-</div>
+  <div id="counterArea" class="counter-section"></div>
 
-<button class="btn" onclick="initCounters()">Start Counting</button>
+  <script>
+    const counterArea = document.getElementById("counterArea");
 
-<div class="counter-area" id="counterArea"></div>
-
-<button class="btn log-btn" onclick="showLog()">View Log</button>
-<div id="logModal" style="display:none;"></div>
-
-<script>
-const today = new Date().toISOString().split('T')[0];
-
-function getStorage() {
-  return JSON.parse(localStorage.getItem("dhikrData") || "{}");
-}
-
-function saveStorage(data) {
-  localStorage.setItem("dhikrData", JSON.stringify(data));
-}
-
-function initCounters() {
-  const selected = [...document.querySelectorAll('.dhikr-select input:checked')].map(i => i.value);
-  const area = document.getElementById('counterArea');
-  area.innerHTML = '';
-  const data = getStorage();
-
-  selected.forEach(dhikr => {
-    if (!data[today]) data[today] = {};
-    if (!data[today][dhikr]) data[today][dhikr] = 0;
-
-    const box = document.createElement('div');
-    box.className = 'dhikr-box';
-    box.innerHTML = `
-      <h2>${dhikr}</h2>
-      <p>Count: <span id="count-${dhikr}">${data[today][dhikr]}</span></p>
-      <button class="btn" onclick="increment('${dhikr}')">+1</button>
-      <button class="btn reset-btn" onclick="resetCount('${dhikr}')">Reset</button>
-    `;
-    area.appendChild(box);
-  });
-
-  saveStorage(data);
-}
-
-function increment(dhikr) {
-  const data = getStorage();
-  if (!data[today]) data[today] = {};
-  if (!data[today][dhikr]) data[today][dhikr] = 0;
-  data[today][dhikr]++;
-  document.getElementById(`count-${dhikr}`).innerText = data[today][dhikr];
-  saveStorage(data);
-}
-
-function resetCount(dhikr) {
-  const confirmReset = confirm(`Reset count for "${dhikr}" today?`);
-  if (!confirmReset) return;
-  const data = getStorage();
-  data[today][dhikr] = 0;
-  document.getElementById(`count-${dhikr}`).innerText = 0;
-  saveStorage(data);
-}
-
-function showLog() {
-  const data = getStorage();
-  const log = document.getElementById("logModal");
-  log.innerHTML = "<h3>Daily Dhikr Log</h3>";
-  for (const date in data) {
-    log.innerHTML += `<strong>${date}</strong><br/>`;
-    for (const dhikr in data[date]) {
-      log.innerHTML += `- ${dhikr}: ${data[date][dhikr]}<br/>`;
+    function getTodayKolkata() {
+      const today = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
+      return today.split('/').reverse().join('-'); // YYYY-MM-DD
     }
-    log.innerHTML += `<hr/>`;
-  }
-  log.style.display = "block";
-}
-</script>
 
+    const today = getTodayKolkata();
+
+    function startSession() {
+      counterArea.innerHTML = ""; // Reset area
+
+      const selectedOptions = [...document.getElementById("dhikrSelect").selectedOptions];
+      if (selectedOptions.length === 0) {
+        alert("Please select at least one Dhikr.");
+        return;
+      }
+
+      selectedOptions.forEach(opt => {
+        const name = opt.value;
+        const count = getSavedCount(name);
+
+        const box = document.createElement("div");
+        box.className = "counter-box";
+        box.innerHTML = `
+          <div class="dhikr-name">${name}</div>
+          <div class="count" id="count-${name}">${count}</div>
+          <div class="btn-group">
+            <button class="btn btn-increase" onclick="increment('${name}')">+1</button>
+            <button class="btn btn-reset" onclick="reset('${name}')">Reset</button>
+          </div>
+        `;
+        counterArea.appendChild(box);
+      });
+    }
+
+    function getSavedCount(name) {
+      const data = JSON.parse(localStorage.getItem(today)) || {};
+      return data[name] || 0;
+    }
+
+    function saveCount(name, count) {
+      const data = JSON.parse(localStorage.getItem(today)) || {};
+      data[name] = count;
+      localStorage.setItem(today, JSON.stringify(data));
+    }
+
+    function increment(name) {
+      const countEl = document.getElementById("count-" + name);
+      let count = parseInt(countEl.textContent);
+      count++;
+      countEl.textContent = count;
+      saveCount(name, count);
+    }
+
+    function reset(name) {
+      if (confirm(`Reset count for ${name}?`)) {
+        document.getElementById("count-" + name).textContent = "0";
+        saveCount(name, 0);
+      }
+    }
+  </script>
 </body>
 </html>
