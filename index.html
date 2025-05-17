@@ -3,249 +3,191 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dhikr Tracker</title>
+  <title>Dhikr Counter</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-      padding: 20px;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .quote {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      color: #ccc;
+      padding: 0 1rem;
+    }
+
+    .dhikr-select {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+
+    .dhikr-select label {
+      background: #1e1e1e;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .counter-area {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dhikr-box {
+      background: #1f1f1f;
+      border-radius: 10px;
+      padding: 1rem;
       text-align: center;
     }
 
-    h1, h2 {
-      color: #00e676;
-    }
-
-    select, button {
-      padding: 10px;
-      margin: 10px;
-      font-size: 16px;
-      background-color: #1e1e1e;
-      color: #ffffff;
-      border: 1px solid #00e676;
-      border-radius: 5px;
-    }
-
-    .counter-section {
-      margin-top: 20px;
-    }
-
-    .counter-box {
-      display: inline-block;
-      background-color: #1e1e1e;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 10px;
-      min-width: 150px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-
-    .dhikr-name {
-      font-weight: bold;
-      color: #00e676;
-    }
-
-    .count {
-      font-size: 24px;
-      margin: 10px 0;
-    }
-
-    .btn-group {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
+    .dhikr-box h2 {
+      margin: 0;
     }
 
     .btn {
-      padding: 8px 14px;
-      font-size: 14px;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #4caf50;
       border: none;
+      color: white;
+      font-size: 1rem;
       border-radius: 6px;
       cursor: pointer;
     }
 
-    .btn-increase {
-      background: #00e676;
-      color: #000000;
+    .log-btn {
+      background: #2196f3;
+      display: block;
+      margin: 1rem auto;
     }
 
-    .btn-reset {
-      background: #ff1744;
-      color: #ffffff;
+    .reset-btn {
+      background: #f44336;
+      margin-left: 0.5rem;
     }
 
-    .history {
-      margin-top: 30px;
-    }
-
-    .history-entry {
-      background-color: #1e1e1e;
-      padding: 12px;
-      margin: 10px 0;
-      border-left: 5px solid #00e676;
-      border-radius: 6px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.5);
-    }
-
-    .history-entry h3 {
-      margin: 0 0 5px;
-      font-size: 18px;
-      color: #00e676;
-    }
-
-    .history-entry ul {
-      padding-left: 20px;
-      margin: 0;
-      text-align: left;
-    }
-
-    .hadith {
-      margin-top: 30px;
-      background-color: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-
-    .hadith h2 {
-      color: #00e676;
-    }
-
-    .hadith p {
-      font-style: italic;
+    #logModal {
+      background: #222;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <h1>Dhikr Tracker</h1>
+<h1>Dhikr Counter</h1>
+<div class="quote" id="quote"></div>
 
-  <label>Select Dhikrs:</label><br/>
-  <select id="dhikrSelect" multiple>
-    <option value="Subhanallah">Subhanallah</option>
-    <option value="Alhamdulillah">Alhamdulillah</option>
-    <option value="Allahu Akbar">Allahu Akbar</option>
-    <option value="La ilaha illallah">La ilaha illallah</option>
-    <option value="Astaghfirullah">Astaghfirullah</option>
-    <option value="Allahumma salli ala Muhammad">Allahumma salli ala Muhammad</option>
-  </select><br/>
-  <button onclick="startSession()">Start Today's Dhikr</button>
+<div class="dhikr-select">
+  <label><input type="checkbox" value="Astagfirullah" /> Astagfirullah</label>
+  <label><input type="checkbox" value="Subhanallah" /> Subhanallah</label>
+  <label><input type="checkbox" value="Alhamdulillah" /> Alhamdulillah</label>
+  <label><input type="checkbox" value="Allahu Akbar" /> Allahu Akbar</label>
+  <label><input type="checkbox" value="La ilaha illallah" /> La ilaha illallah</label>
+</div>
 
-  <div id="counterArea" class="counter-section"></div>
+<button class="btn" onclick="initCounters()">Start Counting</button>
 
-  <div class="history">
-    <h2>Past Dhikr Logs</h2>
-    <div id="historyList"></div>
-  </div>
+<div class="counter-area" id="counterArea"></div>
 
-  <div class="hadith">
-    <h2>Hadith of the Day</h2>
-    <p id="hadithText"></p>
-  </div>
+<button class="btn log-btn" onclick="showLog()">View Log</button>
+<div id="logModal" style="display:none;"></div>
 
-  <script>
-    function getTodayKolkata() {
-      const today = new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).format(new Date());
-      return today.split('/').reverse().join('-'); // YYYY-MM-DD
+<script>
+const today = new Date().toISOString().split('T')[0];
+
+// Example authentic hadiths from Sahih al-Bukhari
+const hadiths = [
+  "The Prophet (ﷺ) said, 'The best among you are those who learn the Qur'an and teach it.' (Bukhari 5027)",
+  "The Prophet (ﷺ) said, 'The strong is not the one who overcomes the people by his strength, but the strong is the one who controls himself while in anger.' (Bukhari 6114)",
+  "The Prophet (ﷺ) said, 'Whoever believes in Allah and the Last Day should speak what is good or keep silent.' (Bukhari 6136)",
+  "The Prophet (ﷺ) said, 'Facilitate things to people (concerning religious matters), and do not make it hard for them.' (Bukhari 69)",
+  "The Prophet (ﷺ) said, 'A Muslim is the one from whose tongue and hands the Muslims are safe.' (Bukhari 10)"
+];
+
+document.getElementById("quote").innerText = hadiths[Math.floor(Math.random() * hadiths.length)];
+
+function getStorage() {
+  return JSON.parse(localStorage.getItem("dhikrData") || "{}");
+}
+
+function saveStorage(data) {
+  localStorage.setItem("dhikrData", JSON.stringify(data));
+}
+
+function initCounters() {
+  const selected = [...document.querySelectorAll('.dhikr-select input:checked')].map(i => i.value);
+  const area = document.getElementById('counterArea');
+  area.innerHTML = '';
+  const data = getStorage();
+
+  selected.forEach(dhikr => {
+    if (!data[today]) data[today] = {};
+    if (!data[today][dhikr]) data[today][dhikr] = 0;
+
+    const box = document.createElement('div');
+    box.className = 'dhikr-box';
+    box.innerHTML = `
+      <h2>${dhikr}</h2>
+      <p>Count: <span id="count-${dhikr}">${data[today][dhikr]}</span></p>
+      <button class="btn" onclick="increment('${dhikr}')">+1</button>
+      <button class="btn reset-btn" onclick="resetCount('${dhikr}')">Reset</button>
+    `;
+    area.appendChild(box);
+  });
+
+  saveStorage(data);
+}
+
+function increment(dhikr) {
+  const data = getStorage();
+  if (!data[today]) data[today] = {};
+  if (!data[today][dhikr]) data[today][dhikr] = 0;
+  data[today][dhikr]++;
+  document.getElementById(`count-${dhikr}`).innerText = data[today][dhikr];
+  saveStorage(data);
+}
+
+function resetCount(dhikr) {
+  const confirmReset = confirm(`Reset count for "${dhikr}" today?`);
+  if (!confirmReset) return;
+  const data = getStorage();
+  data[today][dhikr] = 0;
+  document.getElementById(`count-${dhikr}`).innerText = 0;
+  saveStorage(data);
+}
+
+function showLog() {
+  const data = getStorage();
+  const log = document.getElementById("logModal");
+  log.innerHTML = "<h3>Daily Dhikr Log</h3>";
+  for (const date in data) {
+    log.innerHTML += `<strong>${date}</strong><br/>`;
+    for (const dhikr in data[date]) {
+      log.innerHTML += `- ${dhikr}: ${data[date][dhikr]}<br/>`;
     }
+    log.innerHTML += `<hr/>`;
+  }
+  log.style.display = "block";
+}
+</script>
 
-    const today = getTodayKolkata();
-    const counterArea = document.getElementById("counterArea");
-    const historyList = document.getElementById("historyList");
-
-    const hadiths = [
-      "The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. (Sahih al-Bukhari, Book 1, Hadith 1)",
-      "None of you believes until he wishes for his brother what he wishes for himself. (Sahih al-Bukhari, Book 2, Hadith 12)",
-      "The real patience is at the first stroke of a calamity. (Sahih al-Bukhari, Book 23, Hadith 389)",
-      "The most excellent Jihad is that for the conquest of self. (Sahih al-Bukhari, Book 56, Hadith 45)",
-      "Utilize the black seed for without a doubt, it is a cure for all sicknesses except death. (Sahih al-Bukhari, Book 71, Hadith 591)"
-    ];
-
-    function displayHadith() {
-      const index = new Date().getDate() % hadiths.length;
-      document.getElementById("hadithText").textContent = hadiths[index];
-    }
-
-    function startSession() {
-      counterArea.innerHTML = "";
-      const selected = [...document.getElementById("dhikrSelect").selectedOptions].map(opt => opt.value);
-      if (selected.length === 0) return alert("Please select at least one dhikr");
-
-      const saved = JSON.parse(localStorage.getItem(today)) || {};
-      selected.forEach(name => {
-        const count = saved[name] || 0;
-        const box = document.createElement("div");
-        box.className = "counter-box";
-        box.innerHTML = `
-          <div class="dhikr-name">${name}</div>
-          <div class="count" id="count-${name}">${count}</div>
-          <div class="btn-group">
-            <button class="btn btn-increase" onclick="increment('${name}')">+1</button>
-            <button class="btn btn-reset" onclick="reset('${name}')">Reset</button>
-          </div>
-        `;
-        counterArea.appendChild(box);
-      });
-    }
-
-    function getSavedData() {
-      const all = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          all[key] = JSON.parse(localStorage.getItem(key));
-        }
-      }
-      return all;
-    }
-
-    function saveCount(name, count) {
-      const data = JSON.parse(localStorage.getItem(today)) || {};
-      data[name] = count;
-      localStorage.setItem(today, JSON.stringify(data));
-      showHistory();
-    }
-
-    function increment(name) {
-      const countEl = document.getElementById("count-" + name);
-      let count = parseInt(countEl.textContent) + 1;
-      countEl.textContent = count;
-      saveCount(name, count);
-    }
-
-    function reset(name) {
-      if (confirm("Reset count for " + name + "?")) {
-        document.getElementById("count-" + name).textContent = "0";
-        saveCount(name, 0);
-      }
-    }
-
-    function showHistory() {
-      const allData = getSavedData();
-      const sortedDates = Object.keys(allData).sort().reverse();
-
-      historyList.innerHTML = '';
-      sortedDates.forEach(date => {
-        const entry = document.createElement('div');
-        entry.className = 'history-entry';
-        entry.innerHTML = `<h3>${date}</h3><ul>${
-          Object.entries(allData[date])
-            .map(([dhikr, count]) => `<li>${dhikr}: ${count}</li>`)
-            .join('')
-        }</ul>`;
-        historyList.appendChild(entry);
-      });
-    }
-
-    displayHadith();
-    showHistory(); // Load on start
-  </script>
 </body>
 </html>
