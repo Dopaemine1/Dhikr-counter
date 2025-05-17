@@ -6,48 +6,48 @@
   <title>Dhikr Tracker</title>
   <style>
     body {
-      font-family: sans-serif;
-      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
       padding: 20px;
-      background: #f7f9fa;
-      color: #333;
+      text-align: center;
     }
 
     h1, h2 {
-      text-align: center;
-      color: #0c4b33;
+      color: #00e676;
     }
 
     select, button {
       padding: 10px;
+      margin: 10px;
       font-size: 16px;
-      margin: 5px;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #00e676;
+      border-radius: 5px;
     }
 
-    .counters {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
+    .counter-section {
       margin-top: 20px;
     }
 
     .counter-box {
-      background: #e8f5e9;
-      border-radius: 10px;
-      padding: 15px;
-      width: 180px;
-      text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      background-color: #1e1e1e;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 10px;
+      min-width: 150px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
 
     .dhikr-name {
       font-weight: bold;
-      color: #00796b;
+      color: #00e676;
     }
 
     .count {
-      font-size: 22px;
+      font-size: 24px;
       margin: 10px 0;
     }
 
@@ -55,24 +55,25 @@
       display: flex;
       justify-content: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .btn {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      padding: 8px 14px;
       font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     .btn-increase {
-      background-color: #4caf50;
-      color: white;
+      background: #00e676;
+      color: #000000;
     }
 
     .btn-reset {
-      background-color: #f44336;
-      color: white;
+      background: #ff1744;
+      color: #ffffff;
     }
 
     .history {
@@ -80,22 +81,40 @@
     }
 
     .history-entry {
-      background: #fff;
+      background-color: #1e1e1e;
       padding: 12px;
       margin: 10px 0;
-      border-left: 5px solid #0c4b33;
+      border-left: 5px solid #00e676;
       border-radius: 6px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
     }
 
     .history-entry h3 {
       margin: 0 0 5px;
       font-size: 18px;
+      color: #00e676;
     }
 
     .history-entry ul {
       padding-left: 20px;
       margin: 0;
+      text-align: left;
+    }
+
+    .hadith {
+      margin-top: 30px;
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .hadith h2 {
+      color: #00e676;
+    }
+
+    .hadith p {
+      font-style: italic;
     }
   </style>
 </head>
@@ -112,13 +131,18 @@
     <option value="Astaghfirullah">Astaghfirullah</option>
     <option value="Allahumma salli ala Muhammad">Allahumma salli ala Muhammad</option>
   </select><br/>
-  <button onclick="startSession()">Start Today’s Dhikr</button>
+  <button onclick="startSession()">Start Today's Dhikr</button>
 
-  <div id="counterArea" class="counters"></div>
+  <div id="counterArea" class="counter-section"></div>
 
   <div class="history">
     <h2>Past Dhikr Logs</h2>
     <div id="historyList"></div>
+  </div>
+
+  <div class="hadith">
+    <h2>Hadith of the Day</h2>
+    <p id="hadithText"></p>
   </div>
 
   <script>
@@ -135,6 +159,19 @@
     const today = getTodayKolkata();
     const counterArea = document.getElementById("counterArea");
     const historyList = document.getElementById("historyList");
+
+    const hadiths = [
+      "The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. (Sahih al-Bukhari, Book 1, Hadith 1)",
+      "None of you believes until he wishes for his brother what he wishes for himself. (Sahih al-Bukhari, Book 2, Hadith 12)",
+      "The real patience is at the first stroke of a calamity. (Sahih al-Bukhari, Book 23, Hadith 389)",
+      "The most excellent Jihad is that for the conquest of self. (Sahih al-Bukhari, Book 56, Hadith 45)",
+      "Utilize the black seed for without a doubt, it is a cure for all sicknesses except death. (Sahih al-Bukhari, Book 71, Hadith 591)"
+    ];
+
+    function displayHadith() {
+      const index = new Date().getDate() % hadiths.length;
+      document.getElementById("hadithText").textContent = hadiths[index];
+    }
 
     function startSession() {
       counterArea.innerHTML = "";
@@ -207,6 +244,7 @@
       });
     }
 
+    displayHadith();
     showHistory(); // Load on start
   </script>
 </body>
